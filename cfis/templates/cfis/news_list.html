@@ -1,0 +1,29 @@
+{% extends "base_menu.html" %}
+{% block content %}
+<h1>Ads</h1>
+<p>
+{% if news_list %}
+<ul>
+  {% for news in news_list %}
+    <li>
+        <a href="{% url 'cfis:news_detail'  news.id %}">{{ news.title }}</a>
+        {% if news.owner == user %}
+        (<a href="{% url 'cfis:news_update' news.id %}">Edit</a> |
+        <a href="{% url 'cfis:news_delete' news.id %}">Delete</a>)
+        {% endif %}
+    </li>
+  {% endfor %}
+</ul>
+{% else %}
+  <p>There are no news in the database.</p>
+{% endif %}
+</p>
+<p>
+<a href="{% url 'cfis:news_create' %}">Add an Ad</a> |
+{% if user.is_authenticated %}
+<a href="{% url 'logout' %}?next={% url 'cfis:all' %}">Logout</a>
+{% else %}
+<a href="{% url 'login' %}?next={% url 'cfis:all' %}">Login</a>
+{% endif %}
+</p>
+{% endblock %}
