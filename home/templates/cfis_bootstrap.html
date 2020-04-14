@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+{% load static %}
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}{{ settings.APP_NAME }}{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <link rel="stylesheet" href="{% static 'cfis/bootstrap/bootstrap.css' %}" media="screen">
+    <link rel="stylesheet" href="{% static 'cfis/_assets/css/custom.min.css' %}">
+{% block head %} {% endblock %}
+</head>
+<body>
+{% block navbar %} {% endblock %}
+<div class="container">
+    {% block content %}
+    {% endblock %}
+</div>
+{% block footer %} {% endblock %}
+<script src="{% static 'cfis/_assets/js/jquery.min.js' %}"></script>
+<script src="{% static 'cfis/_assets/js/popper.min.js' %}"></script>
+<script src="{% static 'cfis/bootstrap/bootstrap.min.js' %}"></script>
+<script src="{% static 'cfis/_assets/js/custom.js' %}"></script>
+</body>
+</html>
+
+
