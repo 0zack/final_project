@@ -2,30 +2,20 @@
 {% block content %}
 <div class="row">
     <div id="main-div" class="col-md-8">
-        <h1>News</h1>
-        <a href="{% url 'cfis:news_create' %}" class="float-right"><button type="button" class="btn btn-outline-primary">Add News</button></a>
+        <h1>Free Board</h1>
+        <a href="{% url 'cfis:post_create' %}" class="float-right"><button type="button" class="btn btn-outline-primary">Add Post</button></a>
         <br /><br />
-        {% if news_list %}
-        {% for p in news_list %}
+        {% if post_list %}
+        {% for p in post_list %}
             <div id="post-card-{{ p.id }}" class="card mb-4">
-                {% if p.picture %}
-                <img class="card-img-top" src="{% url 'cfis:news_picture' p.id %}" alt="Card image cap">
-                {% else %}
-                <img class="card-img-top" src="https://picsum.photos/seed/picsum/750/300" alt="Card image cap">
-                {% endif %}
-                <div class="card-body">
-                    {% if p.content_type %}
-                    <span class="badge badge-primary float-right">{{ p.content_type }}</span>
+                <div class="card-body" onclick="javascript: window.location='{% url 'cfis:post_detail'  p.id %}'" style="cursor: pointer">
+                    {% if p.category %}
+                    <span class="badge badge-primary float-right mt-1">{{ p.category }}</span>
                     {% else %}
-                    <span class="badge badge-primary float-right">Others</span>
+                    <span class="badge badge-primary float-right mt-1">Others</span>
                     {% endif %}
-                    <h2 class="card-title">{{ p.title }}</h2>
-                    <p class="card-text">{{ p.text | truncatewords:50 }}</p>
-                    <a href="{% url 'cfis:news_detail'  p.id %}" id="read-more-post-{{ p.id }}" class="btn btn-primary">Read More &rarr;</a>
-                </div>
-                <div class="card-footer text-muted">
-                    {{ p.created_at }} by
-                    <a href="#">{{ p.owner }} </a>
+                    <h4 class="card-title text-dark">{{ p.title }}</h4>
+                    <h6 class="font-weight-light">{{ p.created_at }} by {{ p.owner }}</h6>
                 </div>
             </div>
         {% endfor %}

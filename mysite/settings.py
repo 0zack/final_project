@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'autos.apps.AutosConfig',
     'wizards.apps.WizardsConfig',
     'ads.apps.AdsConfig',
+    'cats.apps.CatsConfig',
     'cfis.apps.CfisConfig',
 ]
 

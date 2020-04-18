@@ -1,7 +1,7 @@
-from cfis.models import News, NewsComment
+from cfis.models import News, NewsComment, Post, PostComment
 
 from django.views import View
-from cfis.forms import CreateForm
+from cfis.forms import CreateForm, PostCreateForm
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.http import HttpResponse
@@ -13,18 +13,26 @@ from cfis.forms import CommentForm
 from cfis.owner import OwnerListView, OwnerDetailView, OwnerCreateView, OwnerUpdateView, OwnerDeleteView
 
 class HomeView(View):
+    model = News
     def get(self, request) :
         print(request.get_host())
         host = request.get_host()
         islocal = host.find('localhost') >= 0 or host.find('127.0.0.1') >= 0
+
+        news = News.objects.latest('created_at')
         context = {
             'installed' : settings.INSTALLED_APPS,
-            'islocal' : islocal
+            'islocal' : islocal,
+            'news' : news,
         }
         return render(request, 'cfis/main.html', context)
 
 class NewsListView(OwnerListView):
     model = News
+
+    def get_queryset(self):
+        return News.objects.order_by('-created_at')
+
     # By convention:
     # template_name = "cfis/news_list.html"
 
@@ -109,10 +117,95 @@ class NewsCommentCreateView(LoginRequiredMixin, View):
 
 class NewsCommentDeleteView(OwnerDeleteView):
     model = NewsComment
-    template_name = "cfis/comment_delete.html"
+    template_name = "cfis/news_comment_delete.html"
 
     # https://stackoverflow.com/questions/26290415/deleteview-with-a-dynamic-success-url-dependent-on-id
     def get_success_url(self):
         news = self.object.news
         return reverse('cfis:news_detail', args=[news.id])
+
+
+class PostListView(OwnerListView):
+    model = Post
+
+    def get_queryset(self):
+        return Post.objects.order_by('-created_at')
+
+    # By convention:
+    # template_name = "cfis/news_list.html"
+
+class PostDetailView(OwnerDetailView):
+    model = Post
+    template_name = "cfis/post_detail.html"
+    def get(self, request, pk) :
+        post = Post.objects.get(id=pk)
+        comments = PostComment.objects.filter(post=post).order_by('-updated_at')
+        comment_form = CommentForm()
+        context = { 'post' : post, 'comments': comments, 'comment_form': comment_form }
+        return render(request, self.template_name, context)
+
+class PostCreateView(LoginRequiredMixin, View):
+    template = 'cfis/post_form.html'
+    success_url = reverse_lazy('cfis:all')
+    def get(self, request, pk=None) :
+        form = PostCreateForm()
+        ctx = { 'form': form }
+        return render(request, self.template, ctx)
+
+    def post(self, request, pk=None) :
+        form = PostCreateForm(request.POST, request.FILES or None)
+
+        if not form.is_valid() :
+            ctx = {'form' : form}
+            return render(request, self.template, ctx)
+
+        # Add owner to the model before saving
+        pic = form.save(commit=False)
+        pic.owner = self.request.user
+        pic.save()
+        return redirect(self.success_url)
+
+class PostUpdateView(LoginRequiredMixin, View):
+    template = 'cfis/post_form.html'
+    success_url = reverse_lazy('cfis:all')
+    def get(self, request, pk) :
+        pic = get_object_or_404(Post, id=pk, owner=self.request.user)
+        form = CreateForm(instance=pic)
+        ctx = { 'form': form }
+        return render(request, self.template, ctx)
+
+    def post(self, request, pk=None) :
+        pic = get_object_or_404(Post, id=pk, owner=self.request.user)
+        form = CreateForm(request.POST, request.FILES or None, instance=pic)
+
+        if not form.is_valid() :
+            ctx = {'form' : form}
+            return render(request, self.template, ctx)
+
+        pic = form.save(commit=False)
+        pic.save()
+
+        return redirect(self.success_url)
+
+class PostDeleteView(OwnerDeleteView):
+    model = Post
+
+class PostCommentCreateView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        post = get_object_or_404(Post, id=pk)
+        comment = NewsComment(text=request.POST['comment'], owner=request.user, post=post)
+        comment.save()
+        return redirect(reverse('cfis:post_detail', args=[pk]))
+
+class PostCommentDeleteView(OwnerDeleteView):
+    model = PostComment
+    template_name = "cfis/post_comment_delete.html"
+
+    # https://stackoverflow.com/questions/26290415/deleteview-with-a-dynamic-success-url-dependent-on-id
+    def get_success_url(self):
+        post = self.object.post
+        return reverse('cfis:post_detail', args=[post.id])
+
+
+
 

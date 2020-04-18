@@ -1,5 +1,5 @@
 from django import forms
-from cfis.models import News
+from cfis.models import News, Post
 from django.core.files.uploadedfile import InMemoryUploadedFile
 from cfis.humanize import naturalsize
 
@@ -43,6 +43,39 @@ class CreateForm(forms.ModelForm):
             instance.content_type = f.content_type
             instance.picture = bytearr  # Overwrite with the actual image data
 
+        if commit:
+            instance.save()
+
+        return instance
+
+class PostCreateForm(forms.ModelForm):
+    max_upload_limit = 2 * 1024 * 1024
+    max_upload_limit_text = naturalsize(max_upload_limit)
+
+    # Call this 'picture' so it gets copied from the form to the in-memory model
+    # It will not be the "bytes", it will be the "InMemoryUploadedFile"
+    # because we need to pull out things like content_type
+    picture = forms.FileField(required=False, label='File to Upload <= '+max_upload_limit_text)
+    upload_field_name = 'picture'
+
+    # Hint: this will need to be changed for use in the news application :)
+    class Meta:
+        model = Post
+        fields = ['title', 'text', 'picture', 'category', 'tags']  # Picture is manual
+
+    # Validate the size of the picture
+    def clean(self) :
+        cleaned_data = super().clean()
+        pic = cleaned_data.get('picture')
+        if pic is None : return
+        if len(pic) > self.max_upload_limit:
+            self.add_error('picture', "File must be < "+self.max_upload_limit_text+" bytes")
+
+    # Convert uploaded File object to a picture
+    def save(self, commit=True) :
+        instance = super(PostCreateForm, self).save(commit=False)
+
+        # We only need to adjust picture if it is a freshly uploaded file
         if commit:
             instance.save()
 
