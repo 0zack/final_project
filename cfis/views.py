@@ -68,7 +68,7 @@ class NewsCreateView(LoginRequiredMixin, View):
 #     fields = ['title', 'price', 'text']
 
 class NewsUpdateView(LoginRequiredMixin, View):
-    template = 'cfis/ad_form.html'
+    template = 'cfis/news_form.html'
     success_url = reverse_lazy('cfis:all')
     def get(self, request, pk) :
         pic = get_object_or_404(News, id=pk, owner=self.request.user)
@@ -105,14 +105,14 @@ class NewsCommentCreateView(LoginRequiredMixin, View):
         news = get_object_or_404(News, id=pk)
         comment = NewsComment(text=request.POST['comment'], owner=request.user, news=news)
         comment.save()
-        return redirect(reverse('ads:ad_detail', args=[pk]))
+        return redirect(reverse('cfis:news_detail', args=[pk]))
 
 class NewsCommentDeleteView(OwnerDeleteView):
     model = NewsComment
-    template_name = "ads/comment_delete.html"
+    template_name = "cfis/comment_delete.html"
 
     # https://stackoverflow.com/questions/26290415/deleteview-with-a-dynamic-success-url-dependent-on-id
     def get_success_url(self):
         news = self.object.news
-        return reverse('cfis:ad_detail', args=[news.id])
+        return reverse('cfis:news_detail', args=[news.id])
 

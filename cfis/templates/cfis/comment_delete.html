@@ -1,0 +1,12 @@
+{% extends "cfis_footer.html" %}
+{% block content %}
+<h1>Delete Comment</h1>
+
+<p>Are you sure you want to delete</p>
+
+<form action="" method="POST">
+  {% csrf_token %}
+  <input type="submit"  class="btn btn-primary" value="Yes, delete.">
+  <button type="button" class="btn btn-primary" onclick="javascript: window.history.go(-1);">Cancel</button>
+</form>
+{% endblock %}
