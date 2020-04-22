@@ -172,10 +172,8 @@ class PostCreateView(LoginRequiredMixin, View):
         pic = form.save(commit=False)
         pic.owner = self.request.user
         pic.save()
-        # for n in len(pic.tags):
-        #     post_tag = Tag.objects.create(name=pic.tags[n])
-        # tag1 = Tag(name='OPT')
-        # pic.tags.add(tag1)
+        for tag in request.POST.getlist('tags'):
+            pic.tags.add(Tag.objects.get(id=tag))
         return redirect(self.success_url)
 
 class PostUpdateView(LoginRequiredMixin, View):
@@ -197,6 +195,8 @@ class PostUpdateView(LoginRequiredMixin, View):
 
         pic = form.save(commit=False)
         pic.save()
+        for tag in request.POST.getlist('tags'):
+            pic.tags.add(Tag.objects.get(id=tag))
         return redirect(self.success_url)
 
 class PostDeleteView(OwnerDeleteView):
