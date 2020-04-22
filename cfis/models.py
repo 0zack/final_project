@@ -31,12 +31,27 @@ class Post(models.Model) :
     category = models.ForeignKey(Category, blank=True, null=True, on_delete=models.SET_NULL)
     tags = models.ManyToManyField(Tag, blank=True)
 
+    # Favorites
+    favorites = models.ManyToManyField(settings.AUTH_USER_MODEL,
+            through='Fave', related_name='favorite_post')
+
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     # Shows up in the admin list
     def __str__(self):
         return self.title
+
+class Fave(models.Model) :
+    post = models.ForeignKey(Post, on_delete=models.CASCADE)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    # https://docs.djangoproject.com/en/3.0/ref/models/options/#unique-together
+    class Meta:
+        unique_together = ('post', 'user')
+
+    def __str__(self) :
+        return '%s likes %s'%(self.user.username, self.post.title[:10])
 
 class PostComment(models.Model) :
     text = models.TextField(

@@ -10,16 +10,9 @@
             <div id="post-card-{{ p.id }}" class="card mb-4">
                 {% if p.picture %}
                 <img class="card-img-top" src="{% url 'cfis:news_picture' p.id %}" alt="Card image cap">
-                {% else %}
-                <img class="card-img-top" src="https://picsum.photos/seed/picsum/750/300" alt="Card image cap">
                 {% endif %}
                 <div class="card-body">
-                    {% if p.content_type %}
-                    <span class="badge badge-primary float-right">{{ p.content_type }}</span>
-                    {% else %}
-                    <span class="badge badge-primary float-right">Others</span>
-                    {% endif %}
-                    <h2 class="card-title">{{ p.title }}</h2>
+                    <h2 class="card-title" onclick="javascript: window.location='{% url 'cfis:news_detail'  p.id %}'" style="cursor: pointer">{{ p.title }}</h2>
                     <p class="card-text">{{ p.text | truncatewords:50 }}</p>
                     <a href="{% url 'cfis:news_detail'  p.id %}" id="read-more-post-{{ p.id }}" class="btn btn-primary">Read More &rarr;</a>
                 </div>
@@ -33,28 +26,19 @@
             <h3>No post</h3>
         {% endif %}
     </div>
-    <div id="side-div" class="col-md-4">
+    <div id="side-div" class="col-md-4" onclick="javascript: location.href='http://zacklim.pythonanywhere.com/cfis/news/6'" style="cursor: pointer">
         <div class="card">
-            <h3 class="card-header">Card header</h3>
+            <h3 class="card-header">Hot News</h3>
             <div class="card-body">
-                <h5 class="card-title">Special title treatment</h5>
-                <h6 class="card-subtitle text-muted">Support card subtitle</h6>
+                <h5 class="card-title">Coronavirus Diaries: My Green Card Interview Was Canceled...</h5>
+                <h6 class="card-subtitle text-muted">Posted by zacklim</h6>
             </div>
-            <img style="height: 200px; width: 100%; display: block;" src="data:image/svg+xml;charset=UTF-8,%3Csvg%20width%3D%22318%22%20height%3D%22180%22%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%20318%20180%22%20preserveAspectRatio%3D%22none%22%3E%3Cdefs%3E%3Cstyle%20type%3D%22text%2Fcss%22%3E%23holder_158bd1d28ef%20text%20%7B%20fill%3Argba(255%2C255%2C255%2C.75)%3Bfont-weight%3Anormal%3Bfont-family%3AHelvetica%2C%20monospace%3Bfont-size%3A16pt%20%7D%20%3C%2Fstyle%3E%3C%2Fdefs%3E%3Cg%20id%3D%22holder_158bd1d28ef%22%3E%3Crect%20width%3D%22318%22%20height%3D%22180%22%20fill%3D%22%23777%22%3E%3C%2Frect%3E%3Cg%3E%3Ctext%20x%3D%22129.359375%22%20y%3D%2297.35%22%3EImage%3C%2Ftext%3E%3C%2Fg%3E%3C%2Fg%3E%3C%2Fsvg%3E" alt="Card image">
+            <img style="height: 200px; width: 100%; display: block;" src="/cfis/news_picture/6" alt="Card image">
             <div class="card-body">
-                <p class="card-text">Some quick example text to build on the card title and make up the bulk of the card's content.</p>
-            </div>
-            <ul class="list-group list-group-flush">
-                <li class="list-group-item">Cras justo odio</li>
-                <li class="list-group-item">Dapibus ac facilisis in</li>
-                <li class="list-group-item">Vestibulum at eros</li>
-            </ul>
-            <div class="card-body">
-                <a href="#" class="card-link">Card link</a>
-                <a href="#" class="card-link">Another link</a>
+                <p class="card-text">Coronavirus Diaries is a series of dispatches exploring how the coronavirus is affecting people’s lives. For the latest public health information, please refer to the Centers for...</p>
             </div>
             <div class="card-footer text-muted">
-                2 days ago
+                April 16, 2020, 12:57 p.m.
             </div>
         </div>
     </div>

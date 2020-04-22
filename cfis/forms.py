@@ -49,19 +49,19 @@ class CreateForm(forms.ModelForm):
         return instance
 
 class PostCreateForm(forms.ModelForm):
-    max_upload_limit = 2 * 1024 * 1024
-    max_upload_limit_text = naturalsize(max_upload_limit)
+    # max_upload_limit = 2 * 1024 * 1024
+    # max_upload_limit_text = naturalsize(max_upload_limit)
 
     # Call this 'picture' so it gets copied from the form to the in-memory model
     # It will not be the "bytes", it will be the "InMemoryUploadedFile"
     # because we need to pull out things like content_type
-    picture = forms.FileField(required=False, label='File to Upload <= '+max_upload_limit_text)
-    upload_field_name = 'picture'
+    # picture = forms.FileField(required=False, label='File to Upload <= '+max_upload_limit_text)
+    # upload_field_name = 'picture'
 
     # Hint: this will need to be changed for use in the news application :)
     class Meta:
         model = Post
-        fields = ['title', 'text', 'picture', 'category', 'tags']  # Picture is manual
+        fields = ['title', 'text', 'category', 'tags']
 
     # Validate the size of the picture
     def clean(self) :

@@ -1,4 +1,4 @@
-from cfis.models import News, NewsComment, Post, PostComment
+from cfis.models import News, NewsComment, Post, PostComment, Fave, Tag
 
 from django.views import View
 from cfis.forms import CreateForm, PostCreateForm
@@ -8,6 +8,7 @@ from django.http import HttpResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.urls import reverse
 from django.conf import settings
+from django.views.generic.edit import CreateView
 
 from cfis.forms import CommentForm
 from cfis.owner import OwnerListView, OwnerDetailView, OwnerCreateView, OwnerUpdateView, OwnerDeleteView
@@ -20,10 +21,12 @@ class HomeView(View):
         islocal = host.find('localhost') >= 0 or host.find('127.0.0.1') >= 0
 
         news = News.objects.latest('created_at')
+        post = Post.objects.latest('created_at')
         context = {
             'installed' : settings.INSTALLED_APPS,
             'islocal' : islocal,
             'news' : news,
+            'post' : post,
         }
         return render(request, 'cfis/main.html', context)
 
@@ -46,9 +49,6 @@ class NewsDetailView(OwnerDetailView):
         context = { 'news' : news, 'comments': comments, 'comment_form': comment_form }
         return render(request, self.template_name, context)
 
-# class AdCreateView(OwnerCreateView):
-#     model = Ad
-#     fields = ['title', 'price', 'text']
 
 class NewsCreateView(LoginRequiredMixin, View):
     template = 'cfis/news_form.html'
@@ -71,9 +71,6 @@ class NewsCreateView(LoginRequiredMixin, View):
         pic.save()
         return redirect(self.success_url)
 
-# class AdUpdateView(OwnerUpdateView):
-#     model = Ad
-#     fields = ['title', 'price', 'text']
 
 class NewsUpdateView(LoginRequiredMixin, View):
     template = 'cfis/news_form.html'
@@ -128,11 +125,22 @@ class NewsCommentDeleteView(OwnerDeleteView):
 class PostListView(OwnerListView):
     model = Post
 
-    def get_queryset(self):
-        return Post.objects.order_by('-created_at')
+    # def get_queryset(self):
+    #     return Post.objects.order_by('-created_at')
 
     # By convention:
-    # template_name = "cfis/news_list.html"
+    template_name = "cfis/post_list.html"
+
+    def get(self, request) :
+        post_list = Post.objects.order_by('-created_at')
+        favorites = list()
+        if request.user.is_authenticated:
+            # rows = [{'id': 2}, {'id': 4} ... ]  (A list of rows)
+            rows = request.user.favorite_post.values('id')
+            # favorites = [2, 4, ...] using list comprehension
+            favorites = [ row['id'] for row in rows ]
+        ctx = {'post_list' : post_list, 'favorites': favorites}
+        return render(request, self.template_name, ctx)
 
 class PostDetailView(OwnerDetailView):
     model = Post
@@ -143,6 +151,7 @@ class PostDetailView(OwnerDetailView):
         comment_form = CommentForm()
         context = { 'post' : post, 'comments': comments, 'comment_form': comment_form }
         return render(request, self.template_name, context)
+
 
 class PostCreateView(LoginRequiredMixin, View):
     template = 'cfis/post_form.html'
@@ -163,6 +172,10 @@ class PostCreateView(LoginRequiredMixin, View):
         pic = form.save(commit=False)
         pic.owner = self.request.user
         pic.save()
+        # for n in len(pic.tags):
+        #     post_tag = Tag.objects.create(name=pic.tags[n])
+        # tag1 = Tag(name='OPT')
+        # pic.tags.add(tag1)
         return redirect(self.success_url)
 
 class PostUpdateView(LoginRequiredMixin, View):
@@ -170,13 +183,13 @@ class PostUpdateView(LoginRequiredMixin, View):
     success_url = reverse_lazy('cfis:all')
     def get(self, request, pk) :
         pic = get_object_or_404(Post, id=pk, owner=self.request.user)
-        form = CreateForm(instance=pic)
+        form = PostCreateForm(instance=pic)
         ctx = { 'form': form }
         return render(request, self.template, ctx)
 
     def post(self, request, pk=None) :
         pic = get_object_or_404(Post, id=pk, owner=self.request.user)
-        form = CreateForm(request.POST, request.FILES or None, instance=pic)
+        form = PostCreateForm(request.POST, request.FILES or None, instance=pic)
 
         if not form.is_valid() :
             ctx = {'form' : form}
@@ -184,7 +197,6 @@ class PostUpdateView(LoginRequiredMixin, View):
 
         pic = form.save(commit=False)
         pic.save()
-
         return redirect(self.success_url)
 
 class PostDeleteView(OwnerDeleteView):
@@ -193,7 +205,7 @@ class PostDeleteView(OwnerDeleteView):
 class PostCommentCreateView(LoginRequiredMixin, View):
     def post(self, request, pk) :
         post = get_object_or_404(Post, id=pk)
-        comment = NewsComment(text=request.POST['comment'], owner=request.user, post=post)
+        comment = PostComment(text=request.POST['comment'], owner=request.user, post=post)
         comment.save()
         return redirect(reverse('cfis:post_detail', args=[pk]))
 
@@ -206,6 +218,32 @@ class PostCommentDeleteView(OwnerDeleteView):
         post = self.object.post
         return reverse('cfis:post_detail', args=[post.id])
 
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.db.utils import IntegrityError
 
+@method_decorator(csrf_exempt, name='dispatch')
+class AddFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Add PK",pk)
+        post = get_object_or_404(Post, id=pk)
+        fav = Fave(user=request.user, post=post)
+        try:
+            fav.save()  # In case of duplicate key
+        except IntegrityError as e:
+            pass
+        return HttpResponse()
+
+@method_decorator(csrf_exempt, name='dispatch')
+class DeleteFavoriteView(LoginRequiredMixin, View):
+    def post(self, request, pk) :
+        print("Delete PK",pk)
+        post = get_object_or_404(Post, id=pk)
+        try:
+            fav = Fave.objects.get(user=request.user, post=post).delete()
+        except Fave.DoesNotExist as e:
+            pass
+
+        return HttpResponse()
 
 

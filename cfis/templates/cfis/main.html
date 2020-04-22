@@ -3,15 +3,22 @@
       <div class="page-header" id="banner">
         <div class="row">
           <div class="col-lg-12 col-md-7 col-sm-6 text-center mt-5 pt-5">
-            <h1>Community For International Students</h1>
-            <p class="lead">This is an online community for all the international students studying in the Unites States.<br/>
-            If you have not registered yet, please sign up. Otherwise, please sign in to enjoy our community.</p>
-            <br/>
-            <br/>
-            <p class="lead">
-              <a class="btn btn-outline-primary" href="#" role="button">Sign in</a> &nbsp; &nbsp; &nbsp;
-              <a class="btn btn-outline-primary" href="#" role="button">Sign up</a>
-            </p>
+            {% if user.is_authenticated %}
+                <h1>Hello {{ user }},</h1>
+                <p class="lead">welcome to Community For International Students.<br />
+                Please check the most recent news and enjoy the conversation with others!</p>
+                <br/>
+                <br/>
+                <br/>
+            {% else %}
+                <p class="lead">This is an online community for all the international students studying in the Unites States.<br/>
+                If you have not registered yet, please sign up. Otherwise, please sign in to enjoy our community.</p>
+                <br/>
+                <br/>
+                <p class="lead">
+                  <a class="btn btn-outline-primary" href="{% url 'login' %}?next={% url 'cfis:all' %}" role="button">Sign in</a>
+                </p>
+            {% endif %}
           </div>
         </div>
       </div>
@@ -23,8 +30,8 @@
               <h2 id="containers">Recent News</h2>
             </div>
             <div class="bs-component">
-              <div class="jumbotron pt-5 pb-3">
-                <h4 class="display-4">{{ news.title | truncatewords:10 }}</h4>
+              <div class="jumbotron pt-5 pb-2">
+                <h4 class="display-4">{{ news.title | truncatewords:4 }}</h4>
                 <hr class="my-4">
                 <p class="lead">
                     {{ news.text | truncatewords:50 }}
@@ -39,13 +46,13 @@
               <h2 id="containers">Recent Post</h2>
             </div>
             <div class="bs-component">
-              <div class="jumbotron pt-5 pb-3">
-                <h4 class="display-4">{{ news.title | truncatewords:10 }}</h4>
+              <div class="jumbotron pt-5 pb-2">
+                <h4 class="display-4">{{ post.title | truncatewords:4 }}</h4>
                 <hr class="my-4">
                 <p class="lead">
-                    {{ news.text | truncatewords:50 }}
+                    {{ post.text | truncatewords:50 }}
                 <p class="lead pt-3">
-                  <a class="btn btn-primary btn-md" href="{% url 'cfis:news_detail'  news.id %}" id="read-more-post-{{ news.id }}" role="button">Read more</a>
+                  <a class="btn btn-primary btn-md" href="{% url 'cfis:post_detail'  post.id %}" id="read-more-post-{{ post.id }}" role="button">Read more</a>
                 </p>
               </div>
             </div>
