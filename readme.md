@@ -8,23 +8,23 @@ This website is the community for all the international students in the Unites S
 
 ## Inspiration
 
-- **COVID-19**
+- **COVID-19**:
 Many things such as traveling or school things have changed because of COVID-19
 
-- **Immigrant issues**
+- **Immigrant issues**:
 Immigrant related policies are changing rapidly
 
-- **Conversation**
+- **Conversation**:
 International students do not have a place to converse together
 
 ## Page Structure
 **Main**
 >  Main page
 
-**News:**
+**News**
 > Students can share the most recent news about international students or immigrants
 
-**Free Board:**
+**Free Board**
 > Students can upload their posts such as their experience and daily life
 
 ## Models
